@@ -2,6 +2,11 @@ spring:
   application:
     name: backend
     
+  # Désactiver Docker Compose pour le développement
+  docker:
+    compose:
+      enabled: false
+
   datasource:
     url: jdbc:postgresql://${POSTGRES_HOST:localhost}:5432/support_db
     username: ${POSTGRES_USER:postgres}
