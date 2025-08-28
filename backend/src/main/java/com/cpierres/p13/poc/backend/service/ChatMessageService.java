@@ -1,11 +1,11 @@
 package com.cpierres.p13.poc.backend.service;
 
+import com.cpierres.p13.poc.backend.dto.MockUserInfo;
 import com.cpierres.p13.poc.backend.dto.SendMessageRequest;
 import com.cpierres.p13.poc.backend.dto.SystemMessageRequest;
 import com.cpierres.p13.poc.backend.entity.ChatMessage;
 import com.cpierres.p13.poc.backend.entity.SupportTicket;
 import com.cpierres.p13.poc.backend.entity.TicketStatus;
-import com.cpierres.p13.poc.backend.entity.User;
 import com.cpierres.p13.poc.backend.repository.ChatMessageRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,12 +28,19 @@ public class ChatMessageService {
     @Autowired
     private SupportTicketService ticketService;
     
-    @Autowired
-    private UserService userService;
+//    @Autowired
+//    private UserService userService;
+
+    // Au lieu de UserService
+    private final SupportUserService supportUserService;
     
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
-    
+
+    public ChatMessageService(SupportUserService supportUserService) {
+        this.supportUserService = supportUserService;
+    }
+
     /**
      * Envoyer un message de chat avec validation et notification temps réel
      */
@@ -56,7 +63,8 @@ public class ChatMessageService {
         }
         
         // Validation utilisateur existe
-        User sender = userService.getUserById(request.getSenderId());
+        //User sender = userService.getUserById(request.getSenderId());
+        MockUserInfo sender = supportUserService.getChatUserInfo(request.getSenderId());
         log.debug("Message envoyé par : {} ({})", sender.getEmail(), sender.getRole());
         
         // Création du message
@@ -76,16 +84,6 @@ public class ChatMessageService {
         log.info("Message envoyé avec succès dans le ticket {} (ID message: {})", request.getTicketId(), savedMessage.getId());
         
         return savedMessage;
-    }
-    
-    /**
-     * Méthode de compatibilité - Envoyer un message de chat
-     * @deprecated Utiliser sendMessage(SendMessageRequest) à la place
-     */
-    @Deprecated
-    public ChatMessage sendMessage(UUID ticketId, UUID senderId, String content) {
-        SendMessageRequest request = new SendMessageRequest(ticketId, senderId, content);
-        return sendMessage(request);
     }
     
     /**
@@ -132,7 +130,7 @@ public class ChatMessageService {
         log.debug("Récupération messages pour l'expéditeur : {}", senderId);
         
         // Vérifier que l'utilisateur existe
-        userService.getUserById(senderId);
+        supportUserService.getChatUserInfo(senderId);
         
         return messageRepository.findBySenderId(senderId);
     }
@@ -211,7 +209,7 @@ public class ChatMessageService {
         
         // Validation ticket et utilisateur existent
         ticketService.getTicketById(ticketId);
-        User user = userService.getUserById(userId);
+        MockUserInfo user = supportUserService.getChatUserInfo(userId);
         
         // Notification temps réel de saisie
         String typingMessage = user.getFirstName() + " est en train d'écrire...";
@@ -226,7 +224,7 @@ public class ChatMessageService {
         
         // Validation ticket et utilisateur existent
         ticketService.getTicketById(ticketId);
-        User user = userService.getUserById(userId);
+        MockUserInfo user = supportUserService.getChatUserInfo(userId);
         
         // Message système automatique
         String joinMessage = user.getFirstName() + " " + user.getLastName() + " a rejoint la conversation";
@@ -246,7 +244,7 @@ public class ChatMessageService {
         try {
             // Validation ticket et utilisateur existent
             ticketService.getTicketById(ticketId);
-            User user = userService.getUserById(userId);
+            MockUserInfo user = supportUserService.getChatUserInfo(userId);
             
             // Message système automatique
             String leaveMessage = user.getFirstName() + " " + user.getLastName() + " a quitté la conversation";
@@ -294,8 +292,11 @@ public class ChatMessageService {
         // Si c'est le premier message client et que le ticket est OPEN, passer en IN_PROGRESS
         if (ticket.getStatus() == TicketStatus.OPEN && message.getSenderId() != null) {
             try {
-                User sender = userService.getUserById(message.getSenderId());
-                if (sender.getRole().name().equals("CLIENT")) {
+                //User sender = userService.getUserById(message.getSenderId());
+                // Validation de l'utilisateur via le service mock
+                MockUserInfo sender = supportUserService.getChatUserInfo(message.getSenderId());
+
+                if (sender.getRole().equals("CLIENT")) {
                     log.info("Premier message client reçu, passage du ticket {} en IN_PROGRESS", ticket.getId());
                     ticket.setStatus(TicketStatus.IN_PROGRESS);
                     // Note: Éviter la boucle en appelant directement le repository
