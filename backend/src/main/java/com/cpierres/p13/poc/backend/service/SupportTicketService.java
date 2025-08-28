@@ -1,9 +1,8 @@
 package com.cpierres.p13.poc.backend.service;
 
+import com.cpierres.p13.poc.backend.dto.MockUserInfo;
 import com.cpierres.p13.poc.backend.entity.SupportTicket;
 import com.cpierres.p13.poc.backend.entity.TicketStatus;
-import com.cpierres.p13.poc.backend.entity.User;
-import com.cpierres.p13.poc.backend.entity.UserRole;
 import com.cpierres.p13.poc.backend.repository.SupportTicketRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +21,7 @@ public class SupportTicketService {
     private SupportTicketRepository ticketRepository;
     
     @Autowired
-    private UserService userService;
+    private SupportUserService supportUserService;
     
     /**
      * Créer un nouveau ticket de support avec validation métier
@@ -34,7 +33,7 @@ public class SupportTicketService {
         validateTicket(ticket);
         
         // Validation utilisateur
-        User user = userService.getUserById(ticket.getUserId());
+        MockUserInfo user = supportUserService.getChatUserInfo(ticket.getUserId());
         log.debug("Ticket créé pour l'utilisateur : {} ({})", user.getEmail(), user.getRole());
         
         // Auto-assignation si possible
@@ -84,7 +83,7 @@ public class SupportTicketService {
         log.debug("Récupération tickets pour utilisateur ID : {}", userId);
         
         // Vérifier que l'utilisateur existe
-        userService.getUserById(userId);
+        supportUserService.getChatUserInfo(userId);
         
         return ticketRepository.findByUserId(userId);
     }
@@ -250,44 +249,16 @@ public class SupportTicketService {
     }
     
     /**
-     * Auto-assignation d'agent disponible
+     * Auto-assignation d'agent disponible (version simplifiée pour POC)
      */
     private void assignAvailableAgent(SupportTicket ticket) {
         log.debug("Tentative d'auto-assignation d'agent pour le ticket : {}", ticket.getSubject());
         
-        // Récupérer tous les agents
-        List<User> agents = userService.getAllAgents();
-        
-        if (agents.isEmpty()) {
-            log.warn("Aucun agent disponible pour l'auto-assignation");
-            return;
-        }
-        
-        // Logique d'assignation basique : trouver l'agent avec le moins de tickets actifs
-        String bestAgent = null;
-        int minActiveTickets = Integer.MAX_VALUE;
-        
-        for (User agent : agents) {
-            String agentName = agent.getFirstName() + " " + agent.getLastName();
-            List<SupportTicket> agentTickets = ticketRepository.findByAssignedAgent(agentName);
-            
-            // Compter seulement les tickets actifs
-            long activeTickets = agentTickets.stream()
-                    .filter(t -> t.getStatus() == TicketStatus.OPEN || t.getStatus() == TicketStatus.IN_PROGRESS)
-                    .count();
-            
-            if (activeTickets < minActiveTickets) {
-                minActiveTickets = (int) activeTickets;
-                bestAgent = agentName;
-            }
-        }
-        
-        if (bestAgent != null && minActiveTickets < 5) { // Seuil configurable
-            ticket.setAssignedAgent(bestAgent);
-            log.info("Ticket auto-assigné à l'agent : {}", bestAgent);
-        } else {
-            log.info("Tous les agents ont trop de tickets actifs, ticket non assigné automatiquement");
-        }
+        // Pour le POC, assignation statique à l'agent de démonstration
+        // Dans une version complète, cette logique ferait appel au user-service
+        String defaultAgent = "Marie Agent";
+        ticket.setAssignedAgent(defaultAgent);
+        log.info("Ticket auto-assigné à l'agent par défaut : {}", defaultAgent);
     }
     
     /**
