@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/chat")
+@RequestMapping("/api")
 @CrossOrigin(origins = "*")
 @Slf4j
 public class ChatRestController {

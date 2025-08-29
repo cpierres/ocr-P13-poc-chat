@@ -23,7 +23,8 @@ public class MockAuthService {
     private void initializeMockUsers() {
         // Client de démonstration
         MockUserInfo client = new MockUserInfo(
-                UUID.randomUUID(),
+                //UUID.randomUUID(),
+                UUID.fromString("822d37e8-812f-4059-81ac-357cb3b45b50"),
                 "christophe.pierres@hotmail.com",
                 "Christophe",
                 "Pierrès",
@@ -32,7 +33,8 @@ public class MockAuthService {
 
         // Agent de démonstration
         MockUserInfo agent = new MockUserInfo(
-                UUID.randomUUID(),
+                //UUID.randomUUID(),
+                UUID.fromString("3031d66c-0bcd-478a-b920-af766623a2fb"),
                 "marie.agent@yourcaryourway.com",
                 "Marie",
                 "Agent",
@@ -74,5 +76,13 @@ public class MockAuthService {
 
     public Map<String, MockUserInfo> getAllMockUsers() {
         return Map.copyOf(mockUsers);
+    }
+
+    public String getUserClientId() {
+        return mockUsers.get("mock-client-token").getId().toString();
+    }
+
+    public String getUserAgentId() {
+        return mockUsers.get("mock-agent-token").getId().toString();
     }
 }

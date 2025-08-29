@@ -13,9 +13,9 @@ export class TicketService {
 
   createTicket(subject: string, description: string, userId: string): Observable<SupportTicket> {
     const ticket = {
-      userId,
-      subject,
-      description
+      userId: userId,
+      subject: subject,
+      description: description
     };
 
     return this.http.post<SupportTicket>(`${this.apiUrl}/tickets`, ticket);

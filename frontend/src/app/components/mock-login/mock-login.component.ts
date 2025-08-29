@@ -43,19 +43,19 @@ import { MockUser } from '../../models/user.model';
           @if (isLoading()) {
             <mat-spinner diameter="30"></mat-spinner>
           } @else {
-            <button mat-raised-button
+            <button mat-stroked-button
                     color="primary"
                     (click)="loginAsClient()"
                     [disabled]="currentUser()?.role === 'CLIENT'">
-              <mat-icon>person</mat-icon>
+              <!-- mat-icon>person</mat-icon -->
               Se connecter en tant que Client
             </button>
 
-            <button mat-raised-button
+            <button mat-stroked-button
                     color="accent"
                     (click)="loginAsAgent()"
                     [disabled]="currentUser()?.role === 'AGENT'">
-              <mat-icon>support_agent</mat-icon>
+              <!-- mat-icon>support_agent</mat-icon -->
               Se connecter en tant qu'Agent
             </button>
 
@@ -77,7 +77,7 @@ import { MockUser } from '../../models/user.model';
       align-items: center;
       min-height: 100vh;
       padding: 20px;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: white;
     }
 
     .login-card {

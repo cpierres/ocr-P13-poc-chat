@@ -1,12 +1,12 @@
 import { Component } from '@angular/core';
-import { MockLoginComponent } from './components/mock-login/mock-login.component';
+import { MainAppComponent } from './components/main-app/main-app.component';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [MockLoginComponent],
+  imports: [MainAppComponent],
   template: `
-    <app-mock-login></app-mock-login>
+    <app-main-app></app-main-app>
   `,
   styleUrl: './app.scss'
 })
