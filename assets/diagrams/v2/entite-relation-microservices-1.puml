@@ -1,0 +1,136 @@
+@startuml Entités-Relations séparées par Microservices
+!theme plain
+
+package "Auth Service Database" {
+  entity "auth_users" as auth_users {
+    * id : UUID <<PK>>
+    --
+    * email : VARCHAR(255) <<unique>>
+    * password_hash : VARCHAR(255)
+    * last_login : TIMESTAMP
+    * is_active : BOOLEAN
+    * created_at : TIMESTAMP
+    * updated_at : TIMESTAMP
+  }
+
+  note top of auth_users
+    Base Auth Service :
+    - Authentification utilisateurs
+    - Contrôle des rôles
+  end note
+}
+
+package "User Management Service Database" {
+  entity "users" as users {
+    * id : UUID <<PK>>
+    --
+    * auth_user_id : UUID <<logical FK>>
+    * first_name : VARCHAR(100)
+    * last_name : VARCHAR(100)
+    * email : VARCHAR(255) <<unique>>
+    * emailVerified : BOOLEAN
+    * birth_date : DATE
+    * phone_number : VARCHAR(20)
+    * created_at : TIMESTAMP
+    * updated_at : TIMESTAMP
+  }
+  
+  entity "user_addresses" as user_addresses {
+    * id : UUID <<PK>>
+    --
+    * user_id : UUID <<FK>>
+    * street : TEXT
+    * city : VARCHAR(100)
+    * postal_code : VARCHAR(20)
+    * country : VARCHAR(100)
+    * region : VARCHAR(100)
+    * is_primary : BOOLEAN
+  }
+  
+  entity "user_preferences" as user_preferences {
+    * id : UUID <<PK>>
+    --
+    * user_id : UUID <<FK>>
+    * language : VARCHAR(10)
+    * currency : VARCHAR(10)
+    * timezone : VARCHAR(50)
+    * email_notifications : BOOLEAN
+    * sms_notifications : BOOLEAN
+    * push_notifications : BOOLEAN
+  }
+  
+  users ||--o{ user_addresses
+  users ||--|| user_preferences
+  
+  note top of users
+    Base User Service :
+    - Profils utilisateurs complets
+    - Adresses multiples
+    - Préférences personnalisées
+  end note
+}
+
+
+package "Reservation Service Database" {
+  entity "reservations" as reservations {
+    * id : UUID <<PK>>
+    --
+    * user_id : UUID <<logical FK>>
+    * vehicle_id : UUID <<logical FK>>
+    * pickup_agency_id : UUID <<logical FK>>
+    * return_agency_id : UUID <<logical FK>>
+    * start_date : TIMESTAMP
+    * end_date : TIMESTAMP
+    * status : reservation_status
+    * total_price : DECIMAL(10,2)
+    * cancellation_policy_id : UUID <<FK>>
+    * created_at : TIMESTAMP
+    * updated_at : TIMESTAMP
+  }
+  
+  entity "offers" as offers {
+    * id : UUID <<PK>>
+    --
+    * vehicle_id : UUID <<logical FK>>
+    * pickup_agency_id : UUID <<logical FK>>
+    * return_agency_id : UUID <<logical FK>>
+    * valid_from : TIMESTAMP
+    * valid_to : TIMESTAMP
+    * price : DECIMAL(10,2)
+    * conditions : TEXT
+    * is_active : BOOLEAN
+    * created_at : TIMESTAMP
+  }
+  
+  entity "cancellation_policies" as cancellation_policies {
+    * id : UUID <<PK>>
+    --
+    * name : VARCHAR(100)
+    * hours_before_pickup : INTEGER
+    * refund_percentage : DECIMAL(5,2)
+    * description : TEXT
+  }
+  
+  entity "payments" as payments {
+    * id : UUID <<PK>>
+    --
+    * reservation_id : UUID <<FK>>
+    * amount : DECIMAL(10,2)
+    * status : payment_status
+    * payment_method : VARCHAR(50)
+    * stripe_transaction_id : VARCHAR(255)
+    * created_at : TIMESTAMP
+  }
+  
+  reservations ||--|| cancellation_policies
+  reservations ||--o{ payments
+  
+  note top of reservations
+    Base Reservation Service :
+    - Gestion des réservations
+    - Offres commerciales
+    - Paiements Stripe
+  end note
+}
+
+@enduml

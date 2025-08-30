@@ -1,0 +1,36 @@
+@startuml Entités-Relations séparées par Microservices
+!theme plain
+
+' Relations logiques inter-services (pas de FK physiques)
+note as logical_relations
+  **Relations logiques entre services :**
+
+  - auth_users.id = users.auth_user_id
+  - users.id = reservations.user_id
+  - vehicles.id = reservations.vehicle_id
+  - agencies.id = reservations.pickup_agency_id
+  - users.id = support_tickets.user_id
+  - users.id = notifications.user_id
+
+  Ces relations sont maintenues par
+  les événements Kafka entre services
+end note
+
+' Types énumérés définis au niveau global
+note as global_enums
+
+  **Types énumérés globaux :**
+
+  reservation_status: PENDING, CONFIRMED, IN_PROGRESS, COMPLETED, CANCELLED, MODIFIED
+  payment_status: PENDING, COMPLETED, FAILED, REFUNDED
+  ticket_status: OPEN, IN_PROGRESS, RESOLVED, CLOSED
+  priority_level: LOW, MEDIUM, HIGH, URGENT
+  sender_type: USER, AGENT, SYSTEM
+  message_type: TEXT, IMAGE, FILE, SYSTEM_MESSAGE
+  session_status: SCHEDULED, ACTIVE, ENDED, CANCELLED
+  notification_type: RESERVATION_CONFIRMED, RESERVATION_REMINDER,  RESERVATION_CANCELLED, SUPPORT_MESSAGE, PROMOTIONAL, SYSTEM_ALERT
+  notification_channel: EMAIL, SMS, PUSH, IN_APP
+end note
+
+
+@enduml

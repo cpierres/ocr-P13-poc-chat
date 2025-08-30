@@ -1,0 +1,58 @@
+@startuml User Management Service - Diagramme de Classes
+!theme plain
+
+title User Management Service - Modèle de Domaine
+
+package "User Management Service Domain" {
+  class User {
+    -id: UUID
+    -firstName: String
+    -lastName: String
+    -phoneNumber: String
+    -birth_date : DATE
+    -preferredLanguage: String
+    -preferredCurrency: String
+    -timezone: String
+    -email: String
+    -emailVerified: Boolean
+    -emailNotifications: Boolean
+    -smsNotifications: Boolean
+    -role: UserRole
+    -createdAt: Timestamp
+    -createdAt: Timestamp
+    --
+    +updateProfile(): void
+    +deleteAccount(): void
+  }
+
+    class UserAddresses  {
+      -id : UUID
+      -user_id : UUID
+      -street : TEXT
+      -city : VARCHAR(100)
+      -postal_code : VARCHAR(20)
+      -country : VARCHAR(100)
+      -region : VARCHAR(100)
+      -is_primary : BOOLEAN
+    }
+
+    enum UserRole {
+      CLIENT
+      AGENT
+    }
+
+  User }o--|| UserRole : "a"
+  User ||--o  UserAddresses : possède
+}
+
+note as architecture_note
+  **User Service - Gestion des profils**
+  
+  **Fonctionnalités :** Consulter, modifier et supprimer profil utilisateur
+  **Données :** Nom, prénom, adresse
+  **Base de données :** PostgreSQL dédiée (user_db)
+  
+  **Bounded Context :** Profils utilisateur
+end note
+
+@enduml

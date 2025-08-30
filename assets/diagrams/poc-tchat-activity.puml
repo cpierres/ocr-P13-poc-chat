@@ -1,0 +1,149 @@
+@startuml Diagramme d'activité - POC de tchat
+!theme plain
+skinparam ActivityBackgroundColor #FEFECE
+skinparam ActivityBorderColor #A80036
+skinparam ActivityDiamondBackgroundColor #FEFECE
+skinparam ActivityDiamondBorderColor #A80036
+skinparam ActivityStartColor #000000
+skinparam ActivityEndColor #000000
+
+|Client|
+start
+:Accéder à la page de support;
+:Sélectionner l'option de tchat;
+:Remplir le formulaire de demande\n(sujet, description du problème);
+:Soumettre la demande de tchat;
+
+|Système de Tchat|
+:Créer une nouvelle session de tchat;
+:Enregistrer les informations de la demande;
+:Placer le client dans la file d'attente;
+:Notifier les agents disponibles;
+
+|Agent Support|
+:Recevoir notification\nde nouvelle demande;
+:Consulter la liste des demandes en attente;
+:Accepter une demande de tchat;
+
+|Système de Tchat|
+:Attribuer l'agent à la session;
+:Mettre à jour le statut de la session;
+:Notifier le client qu'un agent est connecté;
+:Charger l'historique client (si disponible);
+
+|Client|
+:Recevoir notification\n"Agent connecté";
+
+|Agent Support|
+:Envoyer message d'accueil;
+
+|Système de Tchat|
+:Transmettre le message;
+:Enregistrer le message dans la base de données;
+
+|Client|
+:Recevoir le message d'accueil;
+
+repeat
+  |Client|
+  :Rédiger et envoyer un message;
+
+  |Système de Tchat|
+  :Transmettre le message à l'agent;
+  :Enregistrer le message;
+
+  |Agent Support|
+  :Recevoir et lire le message;
+  :Analyser la demande du client;
+
+  if (Problème résolu?) then (non)
+    :Rédiger et envoyer une réponse;
+
+    |Système de Tchat|
+    :Transmettre la réponse au client;
+    :Enregistrer la réponse;
+
+    |Client|
+    :Recevoir et lire la réponse;
+
+  else (oui)
+    :Proposer une conclusion;
+
+    |Système de Tchat|
+    :Transmettre la conclusion;
+
+    |Client|
+    :Recevoir la conclusion;
+
+  endif
+
+  |Agent Support|
+  if (Besoin de visioconférence?) then (oui)
+    :Proposer une visioconférence;
+
+    |Système de Tchat|
+    :Transmettre la proposition;
+
+    |Client|
+    :Recevoir proposition de visioconférence;
+    if (Accepter visioconférence?) then (oui)
+
+      |Système de Tchat|
+      :Initialiser la visioconférence;
+      :Générer les liens de connexion;
+      :Transmettre les liens;
+
+      |Client|
+      :Se connecter à la visioconférence;
+
+      |Agent Support|
+      :Se connecter à la visioconférence;
+      :Poursuivre l'assistance en visio;
+      :Terminer la visioconférence;
+
+      |Système de Tchat|
+      :Revenir au tchat textuel;
+
+    else (non)
+      |Client|
+      :Décliner la visioconférence;
+
+      |Système de Tchat|
+      :Notifier l'agent du refus;
+
+      |Agent Support|
+      :Poursuivre en tchat textuel;
+
+    endif
+  else (non)
+  endif
+
+  |Client|
+  :Évaluer si le problème est résolu;
+
+repeat while (Problème non résolu et souhaite continuer?) is (oui)
+-> non;
+
+|Client|
+:Terminer la conversation;
+
+|Système de Tchat|
+:Marquer la session comme terminée;
+:Proposer une évaluation de la conversation;
+
+|Client|
+:Évaluer la qualité du support (optionnel);
+
+|Système de Tchat|
+:Enregistrer l'évaluation;
+:Générer un résumé de la conversation;
+:Envoyer une copie par email (optionnel);
+
+|Agent Support|
+:Recevoir notification de fin de session;
+:Consulter le résumé et l'évaluation;
+:Passer à une autre demande;
+
+stop
+
+@enduml

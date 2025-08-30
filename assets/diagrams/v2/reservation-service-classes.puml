@@ -1,0 +1,65 @@
+@startuml Reservation Service - Diagramme de Classes
+!theme plain
+' Configuration pour format A4 portrait
+' skinparam direction top to bottom
+' skinparam ranksep 30
+' skinparam nodesep 15
+' skinparam dpi 300
+' skinparam fontSize 10
+' skinparam componentFontSize 9
+
+title Reservation Service - Modèle de Domaine
+
+package "Reservation Service Domain" {
+  class Reservation {
+    -id: UUID
+    -userId: UUID
+    -vehicleId: UUID
+    -startDate: LocalDateTime
+    -endDate: LocalDateTime
+    -mileagePackage: Integer
+    -totalPrice: BigDecimal
+    -agencyPickupId: UUID
+    -agencyReturnId: UUID
+    --
+    +modify(): void
+    +cancel(): void
+  }
+  
+  class Offer {
+    -id: UUID
+    -vehicleId: UUID
+    -pickupCity: String
+    -returnCity: String
+    -startDate: LocalDateTime
+    -endDate: LocalDateTime
+    -vehicleCategory: String
+    -price: BigDecimal
+    --
+    +getDetails(): String
+  }
+  
+  class Payment {
+    -id: UUID
+    -reservationId: UUID
+    -amount: BigDecimal
+    -status: String
+    --
+    +processPayment(): Boolean
+  }
+  
+  ' Relations
+  Reservation ||--|| Payment : "nécessite"
+}
+
+note as architecture_note
+  **Reservation Service - Gestion des réservations**
+  
+  **Fonctionnalités :** Offres, réservations, paiements externes (Stripe)
+  **Règles :** Modification jusqu'à 48h avant, remboursement 25% < 1 semaine
+  **Base de données :** PostgreSQL dédiée (reservation_db)
+  
+  **Bounded Context :** Réservations et paiements
+end note
+
+@enduml

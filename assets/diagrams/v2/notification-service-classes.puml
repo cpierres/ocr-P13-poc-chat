@@ -1,0 +1,45 @@
+@startuml Notification Service - Diagramme de Classes
+!theme plain
+' Configuration pour format A4 portrait
+' skinparam direction top to bottom
+' skinparam ranksep 30
+' skinparam nodesep 15
+' skinparam dpi 300
+' skinparam fontSize 10
+' skinparam componentFontSize 9
+
+title Notification Service - Modèle de Domaine
+
+package "Notification Service Domain" {
+  class Notification {
+    -id: UUID
+    -userId: UUID
+    -type: String
+    -title: String
+    -content: String
+    -sentAt: LocalDateTime
+    --
+    +send(): void
+  }
+  
+  enum NotificationType {
+    RESERVATION_CONFIRMED
+    RESERVATION_REMINDER
+    SUPPORT_MESSAGE
+  }
+  
+  ' Relations
+  Notification ||--|| NotificationType : "de type"
+}
+
+note as architecture_note
+  **Notification Service - Notifications**
+  
+  **Fonctionnalités :** Notifications de confirmation, rappels, messages support
+  **Canaux :** Email, notifications intégrées
+  **Base de données :** PostgreSQL dédiée (notification_db)
+  
+  **Bounded Context :** Notifications utilisateur
+end note
+
+@enduml

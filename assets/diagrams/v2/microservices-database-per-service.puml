@@ -1,0 +1,90 @@
+@startuml Architecture Microservices avec Database-per-service
+!theme plain
+cloud "Your Car Your Way - Microservices Architecture" {
+  
+  node "API Gateway Cluster" {
+    [Spring Cloud Gateway] as Gateway
+  }
+  
+  package "Auth Microservice" {
+    [Auth Service] as AuthSvc
+    database "Auth PostgreSQL" as AuthDB
+    [Redis Auth Cache] as AuthCache
+    AuthSvc --> AuthDB : JDBC
+    AuthSvc --> AuthCache : Cache Sessions
+  }
+  
+  package "User Management Microservice" {
+    [User Service] as UserSvc
+    database "User PostgreSQL" as UserDB
+    [Redis User Cache] as UserCache
+    UserSvc --> UserDB : JDBC
+    UserSvc --> UserCache : Profile Cache
+  }
+  
+  package "Reservation Microservice" {
+    [Reservation Service] as ReservationSvc
+    database "Reservation PostgreSQL" as ReservationDB
+    [Redis Reservation Cache] as ReservationCache
+    ReservationSvc --> ReservationDB : JDBC
+    ReservationSvc --> ReservationCache : Booking Cache
+  }
+  
+  package "Vehicle Management Microservice" {
+    [Vehicle Service] as VehicleSvc
+    database "Vehicle PostgreSQL" as VehicleDB
+    [Redis Vehicle Cache] as VehicleCache
+    VehicleSvc --> VehicleDB : JDBC
+    VehicleSvc --> VehicleCache : Inventory Cache
+  }
+  
+  package "Support Microservice" {
+    [Support Service] as SupportSvc
+    database "Support PostgreSQL" as SupportDB
+    [Redis Support Cache] as SupportCache
+    SupportSvc --> SupportDB : JDBC
+    SupportSvc --> SupportCache : Chat Sessions
+  }
+  
+  package "Notification Microservice" {
+    [Notification Service] as NotificationSvc
+    database "Notification PostgreSQL" as NotificationDB
+    [Redis Notification Cache] as NotificationCache
+    NotificationSvc --> NotificationDB : JDBC
+    NotificationSvc --> NotificationCache : Message Queue
+  }
+  
+  node "Message Broker" {
+    [Kafka Cluster] as Kafka
+  }
+  
+  ' Communications inter-services via Kafka Events
+  AuthSvc --> Kafka : User Events
+  UserSvc --> Kafka : Profile Events
+  ReservationSvc --> Kafka : Booking Events
+  VehicleSvc --> Kafka : Inventory Events
+  SupportSvc --> Kafka : Support Events
+  NotificationSvc --> Kafka : Notification Events
+  
+  ' Gateway routing vers chaque service
+  Gateway --> AuthSvc : /api/auth/**
+  Gateway --> UserSvc : /api/users/**
+  Gateway --> ReservationSvc : /api/reservations/**
+  Gateway --> VehicleSvc : /api/vehicles/**
+  Gateway --> SupportSvc : /api/support/**
+  Gateway --> NotificationSvc : /api/notifications/**
+  
+  note top of Kafka
+    Kafka assure la communication
+    asynchrone entre microservices
+    et maintient la cohérence éventuelle
+  end note
+  
+  note bottom of AuthDB
+    Chaque microservice possède
+    sa propre base de données
+    (Database-per-service pattern)
+  end note
+}
+
+@enduml

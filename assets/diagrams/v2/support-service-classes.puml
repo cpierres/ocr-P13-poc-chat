@@ -1,0 +1,144 @@
+@startuml Support Service - Diagramme de Classes
+!theme plain
+
+title Support Service - Modèle de Domaine (POC Chat Implémenté)
+
+package "Support Service Domain" {
+  
+  ' === ENTITIES ===
+  class SupportTicket {
+    -id: UUID
+    -userId: UUID
+    -subject: String
+    -description: String
+    -status: TicketStatus
+    -assignedAgentId: UUID
+    -createdAt: LocalDateTime
+    -updatedAt: LocalDateTime
+    --
+    +onCreate(): void
+    +onUpdate(): void
+  }
+  
+  class ChatMessage {
+    -id: UUID
+    -ticketId: UUID
+    -senderId: UUID
+    -content: String
+    -timestamp: LocalDateTime
+    --
+    +onCreate(): void
+  }
+
+  class UserMock {
+    -id: UUID
+    -role: UserRole
+  }
+
+  ' === ENUMS ===
+  enum TicketStatus {
+    OPEN
+    IN_PROGRESS
+    RESOLVED
+    CLOSED
+  }
+  
+  enum UserRole {
+    CLIENT
+    AGENT
+  }
+  
+  ' === REPOSITORIES ===
+  interface SupportTicketRepository {
+    +findByUserId(UUID): List<SupportTicket>
+    +findByAssignedAgent(String): List<SupportTicket>
+    +findByStatus(TicketStatus): List<SupportTicket>
+    +findByUserIdAndStatus(UUID, TicketStatus): List<SupportTicket>
+  }
+  
+  interface ChatMessageRepository {
+    +findByTicketId(UUID): List<ChatMessage>
+    +findByTicketIdOrderByTimestampAsc(UUID): List<ChatMessage>
+    +findBySenderId(UUID): List<ChatMessage>
+    +countByTicketId(UUID): Long
+  }
+  
+  ' === REST CONTROLLERS ===
+  class ChatRestController {
+    -supportTicketRepository: SupportTicketRepository
+    -chatMessageRepository: ChatMessageRepository
+    --
+    +getAllTickets(): ResponseEntity<List<SupportTicket>>
+    +createTicket(SupportTicket): ResponseEntity<SupportTicket>
+    +getMessagesByTicketId(UUID): ResponseEntity<List<ChatMessage>>
+    +createMessage(ChatMessage): ResponseEntity<ChatMessage>
+  }
+  
+
+  ' === WEBSOCKET COMPONENTS ===
+  class ChatWebSocketController {
+    -chatMessageRepository: ChatMessageRepository
+    -messagingTemplate: SimpMessagingTemplate
+    --
+    +sendMessage(ChatMessage): ChatMessage
+    +userJoined(String): String
+    +userLeft(String): String
+    +userTyping(String): void
+  }
+  
+  class WebSocketConfig {
+    --
+    +configureMessageBroker(MessageBrokerRegistry): void
+    +registerStompEndpoints(StompEndpointRegistry): void
+  }
+
+  ' === RELATIONS ===
+  SupportTicket ||--o{ ChatMessage : "contient"
+  SupportTicket }o--|| TicketStatus : "utilise"
+  UserMock }o--|| UserRole : "utilise"
+  ChatMessage }o--|| UserMock : "envoyé par"
+  SupportTicket }o--|| UserMock : "créé par"
+  
+  SupportTicketRepository ||--o SupportTicket : "gère"
+  ChatMessageRepository ||--o ChatMessage : "gère"
+
+  ChatRestController o--|| SupportTicketRepository : "utilise"
+  ChatRestController o--|| ChatMessageRepository : "utilise"
+  ChatWebSocketController o--|| ChatMessageRepository : "utilise"
+}
+
+note as architecture_note
+  **Support Service - Support client (POC Implémenté)**
+  
+  **Fonctionnalités réalisées :**
+  • Chat en temps réel via WebSocket
+  • API REST complète (CRUD)
+  • Gestion des utilisateurs (Client/Agent)
+  • Persistance PostgreSQL
+  • Sessions Redis
+  • Données de démonstration automatiques (Utilisateurs client et agent)
+  
+  **Technologies :**
+  • Spring Boot 3.5.5
+  • WebSocket + STOMP
+  • JPA/Hibernate
+  • Lombok
+  • Docker Compose
+  
+  **Endpoints principaux :**
+  • REST: /api/users, /api/chat/tickets, /api/chat/messages
+  • WebSocket: /ws, /app/chat.send, /topic/messages/{ticketId}
+  
+  **Bounded Context :** Support client temps réel
+end note
+
+note as implementation_note
+  **Implémentation POC - Différences avec l'architecture finale :**
+  
+  • User mocké dans Support Service (simplifié pour POC)
+  • VideoSession non implémenté (focus sur chat texte)
+  • Communication inter-services non nécessaire
+  • Configuration WebSocket complète pour temps réel
+end note
+
+@enduml

@@ -1,0 +1,73 @@
+@startuml Déploiement Multi-Régional A4 Portrait
+!theme plain
+skinparam direction top to bottom
+skinparam ranksep 40
+skinparam nodesep 20
+
+' Niveau 1: DNS Global (haut)
+cloud "Niveau Global" {
+  [Route 53 DNS] as DNS
+  [CloudFront CDN] as CDN
+  DNS --> CDN
+}
+
+' Niveau 2: Load Balancers régionaux
+package "Niveau Load Balancing" {
+  [EU Load Balancer] as EU_LB
+  [US Load Balancer] as US_LB  
+  [UK Load Balancer] as UK_LB
+
+  CDN --> EU_LB
+  CDN --> US_LB
+  CDN --> UK_LB
+}
+
+' Niveau 3: Services par région (empilés verticalement)
+package "Niveau Services Europe" {
+  [Auth Service EU] as EU_Auth
+  [User Service EU] as EU_User
+  [Reservation Service EU] as EU_Reservation
+
+  EU_LB --> EU_Auth
+  EU_LB --> EU_User
+  EU_LB --> EU_Reservation
+}
+
+package "Niveau Services US" {
+  [Auth Service US] as US_Auth
+  [User Service US] as US_User
+  [Reservation Service US] as US_Reservation
+
+  US_LB --> US_Auth
+  US_LB --> US_User
+  US_LB --> US_Reservation
+}
+
+package "Niveau Services UK" {
+  [Auth Service UK] as UK_Auth
+  [User Service UK] as UK_User
+  [Reservation Service UK] as UK_Reservation
+
+  UK_LB --> UK_Auth
+  UK_LB --> UK_User
+  UK_LB --> UK_Reservation
+}
+
+' Niveau 4: Bases de données (bas)
+package "Niveau Données" {
+  database "EU Databases" as EU_DB
+  database "US Databases" as US_DB
+  database "UK Databases" as UK_DB
+
+  EU_Auth --> EU_DB
+  EU_User --> EU_DB
+  EU_Reservation --> EU_DB
+  US_Auth --> US_DB
+  US_User --> US_DB
+  US_Reservation --> US_DB
+  UK_Auth --> UK_DB
+  UK_User --> UK_DB
+  UK_Reservation --> UK_DB
+}
+
+@enduml

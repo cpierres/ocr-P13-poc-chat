@@ -1,0 +1,52 @@
+@startuml Architecture Microservices - Format A4 Portrait
+!theme plain
+skinparam direction top to bottom
+skinparam ranksep 30
+skinparam nodesep 15
+
+' Disposition verticale des couches
+cloud "Your Car Your Way" {
+
+  ' Couche 1: API Gateway (en haut)
+  package "Couche API Gateway" {
+    [Spring Cloud Gateway] as Gateway
+  }
+
+  ' Couche 2: Services métier (milieu)
+  package "Couche Services Métier" {
+    package "Auth Microservice" {
+      [Auth Service] as AuthSvc
+      database "Auth PostgreSQL" as AuthDB
+    }
+
+    package "User Management" {
+      [User Service] as UserSvc
+      database "User PostgreSQL" as UserDB
+    }
+
+    package "Reservation Service" {
+      [Reservation Service] as ReservationSvc
+      database "Reservation PostgreSQL" as ReservationDB
+    }
+  }
+
+  ' Couche 3: Infrastructure (en bas)
+  package "Couche Infrastructure" {
+    [Kafka Cluster] as Kafka
+    [Redis Cluster] as Redis
+  }
+
+  ' Relations verticales
+  Gateway --> AuthSvc
+  Gateway --> UserSvc
+  Gateway --> ReservationSvc
+
+  AuthSvc --> AuthDB
+  UserSvc --> UserDB
+  ReservationSvc --> ReservationDB
+
+  AuthSvc --> Kafka
+  UserSvc --> Kafka
+  ReservationSvc --> Kafka
+}
+@enduml

@@ -1,0 +1,75 @@
+@startuml Diagramme de séquence - POC de tchat
+!theme plain
+skinparam sequenceArrowThickness 2
+skinparam roundcorner 5
+skinparam maxmessagesize 100
+
+actor "Client" as Client
+actor "Agent Support" as Agent
+participant "Interface Client" as ClientUI
+participant "Interface Agent" as AgentUI
+participant "Service de Tchat" as ChatService
+participant "Base de données" as DB
+participant "Service de Notification" as NotifService
+
+== Initialisation du tchat ==
+
+Client -> ClientUI : Accéder à la page de support
+ClientUI -> ChatService : Demander une session de tchat
+ChatService -> DB : Créer une nouvelle session
+DB --> ChatService : Session créée (ID)
+ChatService -> NotifService : Notifier les agents disponibles
+NotifService -> AgentUI : Notification de nouvelle demande
+ChatService --> ClientUI : Session initialisée, en attente d'agent
+ClientUI --> Client : Afficher message d'attente
+
+== Attribution d'un agent ==
+
+Agent -> AgentUI : Accepter la demande de tchat
+AgentUI -> ChatService : Rejoindre la session
+ChatService -> DB : Mettre à jour la session avec l'agent
+DB --> ChatService : Session mise à jour
+ChatService --> ClientUI : Agent connecté
+ChatService --> AgentUI : Client en attente
+ClientUI --> Client : Afficher notification "Agent connecté"
+AgentUI --> Agent : Afficher historique et informations client
+
+== Échange de messages ==
+
+Client -> ClientUI : Envoyer un message
+ClientUI -> ChatService : Transmettre le message
+ChatService -> DB : Enregistrer le message
+ChatService -> AgentUI : Transmettre le message
+AgentUI --> Agent : Afficher le message
+Agent -> AgentUI : Répondre au message
+AgentUI -> ChatService : Transmettre la réponse
+ChatService -> DB : Enregistrer la réponse
+ChatService -> ClientUI : Transmettre la réponse
+ClientUI --> Client : Afficher la réponse
+
+== Transfert vers visioconférence (optionnel) ==
+
+Agent -> AgentUI : Proposer une visioconférence
+AgentUI -> ChatService : Demande de visioconférence
+ChatService -> ClientUI : Transmettre la proposition
+ClientUI --> Client : Afficher proposition de visioconférence
+Client -> ClientUI : Accepter la visioconférence
+ClientUI -> ChatService : Acceptation de visioconférence
+ChatService -> DB : Mettre à jour la session (visio)
+ChatService -> NotifService : Initialiser la visioconférence
+NotifService --> ClientUI : URL de la visioconférence
+NotifService --> AgentUI : URL de la visioconférence
+ClientUI --> Client : Rediriger vers la visioconférence
+AgentUI --> Agent : Rediriger vers la visioconférence
+
+== Fin de session ==
+
+Client -> ClientUI : Terminer la conversation
+ClientUI -> ChatService : Demande de fin de session
+ChatService -> DB : Marquer la session comme terminée
+ChatService -> AgentUI : Notification de fin de session
+ChatService -> ClientUI : Session terminée
+ClientUI -> Client : Proposer d'évaluer la conversation
+AgentUI -> Agent : Afficher résumé de la conversation
+
+@enduml

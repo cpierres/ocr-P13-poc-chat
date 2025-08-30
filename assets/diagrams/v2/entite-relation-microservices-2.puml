@@ -1,0 +1,145 @@
+@startuml Entités-Relations séparées par Microservices
+!theme plain
+
+package "Support Service Database" {
+  entity "support_tickets" as support_tickets {
+    * id : UUID <<PK>>
+    --
+    * user_id : UUID <<logical FK>>
+    * subject : VARCHAR(255)
+    * description : TEXT
+    * status : ticket_status
+    * priority : priority_level
+    * assigned_agent : VARCHAR(100)
+    * created_at : TIMESTAMP
+    * updated_at : TIMESTAMP
+  }
+  
+  entity "chat_messages" as chat_messages {
+    * id : UUID <<PK>>
+    --
+    * ticket_id : UUID <<FK>>
+    * sender_id : UUID <<logical FK>>
+    * sender_type : sender_type
+    * content : TEXT
+    * message_type : message_type
+    * timestamp : TIMESTAMP
+  }
+  
+  entity "video_sessions" as video_sessions {
+    * id : UUID <<PK>>
+    --
+    * ticket_id : UUID <<FK>>
+    * session_url : VARCHAR(500)
+    * start_time : TIMESTAMP
+    * end_time : TIMESTAMP
+    * status : session_status
+    * recording_url : VARCHAR(500)
+  }
+  
+  support_tickets ||--o{ chat_messages
+  support_tickets ||--o{ video_sessions
+  
+  note top of support_tickets
+    Base Support Service :
+    - Tickets de support
+    - Chat temps réel
+    - Sessions vidéo
+  end note
+}
+
+package "Vehicle Service Database" {
+  entity "vehicles" as vehicles {
+    * id : UUID <<PK>>
+    --
+    * model : VARCHAR(100)
+    * brand : VARCHAR(100)
+    * year : INTEGER
+    * acriss_code : VARCHAR(4) <<NOT NULL>>
+    * seats : INTEGER
+    * doors : INTEGER
+    * fuel_type : VARCHAR(50)
+    * transmission : VARCHAR(20)
+    * air_conditioning : BOOLEAN
+    * created_at : TIMESTAMP
+    * updated_at : TIMESTAMP
+  }
+
+  entity "agencies" as agencies {
+    * id : UUID <<PK>>
+    --
+    * name : VARCHAR(255)
+    * street : TEXT
+    * city : VARCHAR(100)
+    * country : VARCHAR(100)
+    * region : VARCHAR(100)
+    * phone_number : VARCHAR(20)
+    * email : VARCHAR(255)
+    * opening_hours : TEXT
+    * created_at : TIMESTAMP
+    * updated_at : TIMESTAMP
+  }
+
+  entity "vehicle_inventory" as vehicle_inventory {
+    * id : UUID <<PK>>
+    --
+    * vehicle_id : UUID <<FK>>
+    * agency_id : UUID <<FK>>
+    * quantity : INTEGER
+    * available_quantity : INTEGER
+    * created_at : TIMESTAMP
+    * updated_at : TIMESTAMP
+  }
+
+  vehicles ||--o{ vehicle_inventory
+  agencies ||--o{ vehicle_inventory
+
+  note top of vehicles
+    Base Vehicle Service :
+    - Catalogue véhicules ACRISS
+    - Inventaire par agence
+    - Gestion des stocks
+  end note
+}
+
+
+package "Notification Service Database" {
+  entity "notifications" as notifications {
+    * id : UUID <<PK>>
+    --
+    * user_id : UUID <<logical FK>>
+    * type : notification_type
+    * channel : notification_channel
+    * title : VARCHAR(255)
+    * content : TEXT
+    * metadata : JSONB
+    * read : BOOLEAN
+    * sent_at : TIMESTAMP
+    * delivered_at : TIMESTAMP
+  }
+  
+  entity "notification_templates" as notification_templates {
+    * id : UUID <<PK>>
+    --
+    * type : notification_type
+    * language : VARCHAR(10)
+    * channel : notification_channel
+    * subject_template : TEXT
+    * body_template : TEXT
+    * created_at : TIMESTAMP
+    * updated_at : TIMESTAMP
+  }
+  
+  notifications ||--|| notification_templates
+  
+  note top of notifications
+    Base Notification Service :
+    - Notifications multi-canal
+    - Templates localisés
+    - Historique des envois
+  end note
+}
+
+
+
+@enduml

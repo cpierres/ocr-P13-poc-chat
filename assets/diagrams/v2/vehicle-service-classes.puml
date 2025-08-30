@@ -1,0 +1,181 @@
+@startuml Vehicle Service - Diagramme de Classes (Version ACRISS Externe)
+!theme plain
+
+title Vehicle Service - Modèle de Domaine avec Service ACRISS Externe
+
+package "Vehicle Service Domain" {
+  class Vehicle {
+    -id: UUID
+    -model: String
+    -brand: String
+    -year: Integer
+    -agencyId: UUID
+    -registrationNumber: String
+    -status: VehicleStatus
+    -dailyRate: BigDecimal
+    -insurance: String
+    -features: String
+    -acrissCode: String
+    --
+    +getCategory(): AcrissCategory
+    +getType(): AcrissType
+    +getTransmission(): AcrissTransmission
+    +getFuelAirCon(): AcrissFuelAirCon
+  }
+  
+  class Agency {
+    -id: UUID
+    -name: String
+    -address: String
+    -city: String
+    -country: String
+    -contactInfo:String
+    --
+    +getVehicles(): List<Vehicle>
+  }
+
+    class VehicleInventory {
+      -quantity: Integer
+      -availableQuantity: Integer
+      --
+      +updateQuantity(newQuantity: Integer): void
+      +updateAvailableQuantity(newAvailableQuantity: Integer): void
+    }
+
+
+  ' Service externe ACRISS
+  interface AcrissServiceClient {
+    +getCategory(code: String): AcrissCategory
+    +getType(code: String): AcrissType
+    +getTransmission(code: String): AcrissTransmission
+    +getFuelAirCon(code: String): AcrissFuelAirCon
+    +getAllCategories(): List<AcrissCategory>
+    +getAllTypes(): List<AcrissType>
+    +isServiceAvailable(): boolean
+  }
+  
+  class AcrissRestClient {
+    -restTemplate: RestTemplate
+    -baseUrl: String
+    -timeout: Duration
+    --
+    +getCategory(code: String): AcrissCategory
+    +getType(code: String): AcrissType
+    +getTransmission(code: String): AcrissTransmission
+    +getFuelAirCon(code: String): AcrissFuelAirCon
+    +getAllCategories(): List<AcrissCategory>
+    +getAllTypes(): List<AcrissType>
+    +isServiceAvailable(): boolean
+  }
+  
+  class AcrissServiceWithCache {
+    -acrissClient: AcrissServiceClient
+    -redisTemplate: RedisTemplate
+    -fallbackService: AcrissFallbackService
+    -cacheExpiration: Duration
+    --
+    +getCategory(code: String): AcrissCategory
+    +getType(code: String): AcrissType
+    +getTransmission(code: String): AcrissTransmission
+    +getFuelAirCon(code: String): AcrissFuelAirCon
+    -getCachedOrFetch(key: String, supplier: Supplier): Object
+    -handleServiceFailure(fallback: Supplier): Object
+  }
+  
+  class AcrissFallbackService {
+    -localAcrissData: Map<String, Object>
+    --
+    +getCategory(code: String): AcrissCategory
+    +getType(code: String): AcrissType
+    +getTransmission(code: String): AcrissTransmission
+    +getFuelAirCon(code: String): AcrissFuelAirCon
+    -loadLocalFallbackData(): void
+  }
+  
+  ' DTOs pour les réponses du service externe
+  class AcrissCategory {
+    -code: String
+    -description: String
+    -lastUpdated: LocalDateTime
+    --
+    +getCode(): String
+    +getDescription(): String
+  }
+  
+  class AcrissType {
+    -code: String
+    -description: String
+    -lastUpdated: LocalDateTime
+    --
+    +getCode(): String
+    +getDescription(): String
+  }
+  
+  class AcrissTransmission {
+    -code: String
+    -description: String
+    -lastUpdated: LocalDateTime
+    --
+    +getCode(): String
+    +getDescription(): String
+  }
+  
+  class AcrissFuelAirCon {
+    -code: String
+    -description: String
+    -lastUpdated: LocalDateTime
+    --
+    +getCode(): String
+    +getDescription(): String
+  }
+  
+  ' Configuration et Circuit Breaker
+  class AcrissConfiguration {
+    -serviceUrl: String
+    -timeout: Duration
+    -retryAttempts: int
+    -circuitBreakerConfig: CircuitBreakerConfig
+    --
+    +createAcrissClient(): AcrissServiceClient
+    +createCircuitBreaker(): CircuitBreaker
+  }
+  
+  ' Relations
+  Agency ||--o{ Vehicle : "possède"
+  Agency ||--o{ VehicleInventory : "possède"
+  VehicleInventory ||--|{ Vehicle : "contient"
+  Vehicle --> AcrissServiceWithCache : "utilise"
+  AcrissServiceWithCache --> AcrissServiceClient : "délègue à"
+  AcrissServiceWithCache --> AcrissFallbackService : "fallback"
+  AcrissRestClient ..|> AcrissServiceClient : "implémente"
+  AcrissServiceClient --> AcrissCategory : "retourne"
+  AcrissServiceClient --> AcrissType : "retourne"
+  AcrissServiceClient --> AcrissTransmission : "retourne"
+  AcrissServiceClient --> AcrissFuelAirCon : "retourne"
+  AcrissConfiguration --> AcrissRestClient : "configure"
+}
+
+note as external_service_note
+  **Service ACRISS Externe**
+  
+  **URL :** https://api.acriss.org/v1/
+  **Cache :** Redis avec TTL de 24h
+  **Fallback :** Données locales de secours
+  **Circuit Breaker :** 5 échecs → mode dégradé
+  
+  **Avantages :**
+  - Standards toujours à jour
+  - Maintenance centralisée
+  - Conformité internationale
+end note
+
+note as performance_note
+  **Stratégie de Performance**
+  
+  1. **Cache Redis L1 :** Données fréquentes (1h)
+  2. **Cache Local L2 :** Backup en mémoire (24h)  
+  3. **Fallback :** Données essentielles en BDD
+  4. **Circuit Breaker :** Protection contre les pannes
+end note
+
+@enduml

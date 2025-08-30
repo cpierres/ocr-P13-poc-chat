@@ -1,0 +1,29 @@
+@startuml Auth Service - Diagramme de Classes
+!theme plain
+
+title Auth Service - Modèle de Domaine
+
+package "Auth Service Domain" {
+  class User {
+    -id: UUID
+    -email: String
+    -password: String
+    -lastLogin: Timestamp
+    -isActive: Boolean
+    --
+    +authenticate(): Boolean
+    +register(): void
+    +resetPassword(): void
+  }
+}
+
+note as architecture_note
+  **Auth Service - Authentification**
+  
+  **Fonctionnalités :** Inscription, Connexion, Récupération mot de passe
+  **Base de données :** PostgreSQL dédiée (auth_db)
+  
+  **Bounded Context :** Authentification utilisateur
+end note
+
+@enduml
