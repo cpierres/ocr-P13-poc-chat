@@ -8,7 +8,7 @@ POC de chat en temps réel avec WebSocket pour le projet 13 - Architecture micro
 - Se placer dans le **répertoire racine du projet** (où se trouve le fichier `compose.yaml`)
 - Le fichier `compose.yaml` doit être présent à la racine
 
-#### **Démarrer l'environnement complet**
+#### **Démarrer l'environnement base de données+redis+backend**
 
 ```bash
 # Se placer dans le répertoire racine du projet
@@ -24,22 +24,6 @@ docker-compose -f compose.yaml -p ocr-p13-poc-chat ps
 docker-compose -f compose.yaml -p ocr-p13-poc-chat logs -f
 ```
 
-#### **Commandes utiles**
-
-```bash
-# Arrêter tous les services
-docker-compose -f compose.yaml -p ocr-p13-poc-chat down
-
-# Redémarrer un service spécifique
-docker-compose -f compose.yaml -p ocr-p13-poc-chat restart backend
-
-# Reconstruire et redémarrer
-docker-compose -f compose.yaml -p ocr-p13-poc-chat up -d --build --force-recreate
-
-# Voir les logs d'un service spécifique
-docker-compose -f compose.yaml -p ocr-p13-poc-chat logs -f backend
-```
-
 ## Services disponibles
 
 | Service | Port | URL | Description |
@@ -47,3 +31,25 @@ docker-compose -f compose.yaml -p ocr-p13-poc-chat logs -f backend
 | Backend | 8083 | http://localhost:8083 | API REST + WebSocket |
 | PostgreSQL | 5432 | localhost:5432 | Base de données |
 | Redis | 6379 | localhost:6379 | Cache et sessions |
+
+
+## Démarrer le frontend
+Pour démarrer le serveur de développement Angular local, exécuter dans le terminal :
+
+```bash
+# Se placer dans le sous-répertoire du frontend
+cd .\frontend\
+npm run start
+```
+
+## Ouvrir deux sessions dans deux browsers différents 
+
+- copier l'url : http://localhost:4200/
+- la première session se connecte en tant que CLIENT
+  - le CLIENT doit `Créer un ticket et démarrer le chat`
+  - Entrer un premier message
+- la seconde session se connecte en tant que AGENT
+  - l'AGENT clique sur le ticket OPEN
+  - Entrer un message pour répondre
+
+> Les messages s'affichent instantanément de part et d'autre.
