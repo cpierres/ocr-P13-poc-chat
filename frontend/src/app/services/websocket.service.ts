@@ -17,7 +17,7 @@ export class WebSocketService {
 
   private initializeWebSocketConnection() {
     const config: StompConfig = {
-      webSocketFactory: () => new SockJS('http://localhost:8083/ws'),
+      webSocketFactory: () => new SockJS('/ws'),
       connectHeaders: {},
       debug: (str) => console.log('🔌 WebSocket:', str),
       reconnectDelay: 5000,

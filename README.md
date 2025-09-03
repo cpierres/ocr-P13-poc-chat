@@ -14,14 +14,14 @@ POC de chat en temps réel avec WebSocket pour le projet 13 - Architecture micro
 # Se placer dans le répertoire racine du projet
 cd ocr-P13-poc-chat
 
-# Démarrer tous les services avec le fichier compose.yaml (nom de projet: ocr-p13-poc-chat)
-docker-compose -f compose.yaml -p ocr-p13-poc-chat up -d --build
+# Démarrer tous les services avec le fichier docker-compose.yaml (nom de projet: ocr-p13-poc-chat)
+docker-compose -f docker-compose.yaml -p ocr-p13-poc-chat up -d --build
 
 # Vérifier que tous les services sont démarrés
-docker-compose -f compose.yaml -p ocr-p13-poc-chat ps
+docker-compose -f docker-compose.yaml -p ocr-p13-poc-chat ps
 
 # Voir les logs en temps réel
-docker-compose -f compose.yaml -p ocr-p13-poc-chat logs -f
+docker-compose -f docker-compose.yaml -p ocr-p13-poc-chat logs -f
 ```
 
 ## Services disponibles

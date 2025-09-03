@@ -1,5 +1,6 @@
 package com.cpierres.p13.poc.backend.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.cors.CorsConfiguration;
@@ -16,13 +17,19 @@ import java.util.Arrays;
 @Configuration
 public class CorsConfig {
 
+    @Value("${P13_FRONTEND_URL:http://localhost:4200}")
+    private String frontendUrl;
+
     @Bean
     public CorsFilter corsFilter() {
         CorsConfiguration config = new CorsConfiguration();
         
         // Autoriser les requêtes depuis le frontend Angular
         config.setAllowedOrigins(Arrays.asList(
-            "http://localhost:4200"  // Angular dev server
+//                "http://localhost:4200",  // Angular dev server
+//                "http://localhost:8400",  // Docker prodlocal frontend
+//                "http://localhost:8500",  // Docker prodnas frontend
+                frontendUrl              // URL from environment variable
         ));
         
         // Autoriser tous les headers
