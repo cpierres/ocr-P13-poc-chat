@@ -1,10 +1,11 @@
 services:
   postgres:
     image: postgres:15
+    restart: always
     environment:
       POSTGRES_DB: support_db
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
+      POSTGRES_USER: ${P13_DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${P13_DB_PASSWORD:-password}
     ports:
       - "5432:5432"
 
@@ -19,8 +20,8 @@ services:
       - "8083:8083"
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/support_db
-      - SPRING_DATASOURCE_USERNAME=postgres
-      - SPRING_DATASOURCE_PASSWORD=password
+      - SPRING_DATASOURCE_USERNAME=${P13_DB_USER:-postgres}
+      - SPRING_DATASOURCE_PASSWORD=${P13_DB_PASSWORD:-password}
       - SPRING_DATA_REDIS_HOST=redis
       - SPRING_DATA_REDIS_PORT=6379
     depends_on:

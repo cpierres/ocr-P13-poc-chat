@@ -1,0 +1,13 @@
+# **** Ne pas versionner ****
+# configuration Database
+POSTGRES_PORT=5432
+P13_DB_URL=postgresql://postgres-jdbc:8402
+P13_DB_USER=postgres
+P13_DB_PASSWORD=password
+# Frontend URL (important pour CORS)
+P13_FRONTEND_URL=http://localhost:8400
+P13_JWT_SECRET_KEY=vfUI9b82X2CaSN9clY9o2ijcwkgtoWpbjvyD96iRYUU=
+P13_JWT_EXPIRATION_TIME=86400
+P13_DOCKER_PATH_VOLUME=D:\DockerVolumes\p13chat-prodlocal\postgres_data
+# Version du projet pour les images Docker
+PROJECT_VERSION=1.0.0-SNAPSHOT

@@ -7,7 +7,7 @@ import { SupportTicket } from '../models/ticket.model';
   providedIn: 'root'
 })
 export class TicketService {
-  private apiUrl = 'http://localhost:8083/api';
+  private apiUrl = '/api';
 
   constructor(private http: HttpClient) {}
 

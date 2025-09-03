@@ -8,7 +8,7 @@ import { MockUser, LoginResponse } from '../models/user.model';
   providedIn: 'root'
 })
 export class MockAuthService {
-  private apiUrl = 'http://localhost:8083/api/mock';
+  private apiUrl = '/api/mock';
   private currentUser$ = new BehaviorSubject<MockUser | null>(null);
   private currentToken$ = new BehaviorSubject<string | null>(null);
 

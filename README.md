@@ -2,11 +2,27 @@
 
 POC de chat en temps réel avec WebSocket pour le projet 13 - Architecture microservices
 
-## Démarrage avec Docker Compose
+## Démarrage avec Docker Compose (stack complet)
 
 #### **Prérequis**
-- Se placer dans le **répertoire racine du projet** (où se trouve le fichier `compose.yaml`)
-- Le fichier `compose.yaml` doit être présent à la racine
+- Se placer dans le **répertoire racine du projet** (où se trouve le fichier `docker-compose.prodlocal.yml`)
+- Le fichier `docker-compose.prodlocal.yml` doit être présent à la racine
+
+#### **Démarrer le stack complet**
+
+```bash
+# Se placer dans le répertoire racine du projet
+cd ocr-P13-poc-chat
+
+docker-compose -f docker-compose.prodlocal.yaml -p ocr-p13-poc-chat-prodlocal up -d --build
+```
+
+
+## Démarrage avec Docker Compose (mode dev frontend)
+
+#### **Prérequis**
+- Se placer dans le **répertoire racine du projet** (où se trouve le fichier `docker-compose.yaml`)
+- Le fichier `docker-compose.yaml` doit être présent à la racine
 
 #### **Démarrer l'environnement base de données+redis+backend**
 
@@ -14,14 +30,9 @@ POC de chat en temps réel avec WebSocket pour le projet 13 - Architecture micro
 # Se placer dans le répertoire racine du projet
 cd ocr-P13-poc-chat
 
-# Démarrer tous les services avec le fichier compose.yaml (nom de projet: ocr-p13-poc-chat)
-docker-compose -f compose.yaml -p ocr-p13-poc-chat up -d --build
+# Démarrer tous les services avec le fichier docker-compose.yaml (nom de projet: ocr-p13-poc-chat)
+docker-compose -f docker-compose.yaml -p ocr-p13-poc-chat up -d --build
 
-# Vérifier que tous les services sont démarrés
-docker-compose -f compose.yaml -p ocr-p13-poc-chat ps
-
-# Voir les logs en temps réel
-docker-compose -f compose.yaml -p ocr-p13-poc-chat logs -f
 ```
 
 ## Services disponibles
